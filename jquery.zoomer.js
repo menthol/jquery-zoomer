@@ -22,11 +22,13 @@ $('iframe').zoomer({ width: 200, zoom: 0.5 });
             height: 'auto',
             zoom: 0.4,
             tranformOrigin: '0 0',
+            scrollable: false,
             //loading
             loadingType: 'message', // other type: 'spinner'
             loadingMessage: 'Generating preview...',
             spinnerURL: 'http://oi46.tinypic.com/6y375z.jpg', // requires loadingType: 'spinner'
             //hover
+            useZoomerCover: true,
             message: 'Open Page',
             ieMessageButtonClass: 'btn btn-secondary', // used in IE only
             messageURL: false,
@@ -45,6 +47,9 @@ $('iframe').zoomer({ width: 200, zoom: 0.5 });
             '-o-user-select':      'none',
             'user-select': 'none',
             'overflow': 'hidden'
+        },
+        scrollable = {
+            'overflow': 'scroll'
         },
         absolute = {
             top: 0,
@@ -80,6 +85,11 @@ $('iframe').zoomer({ width: 200, zoom: 0.5 });
                 .css(invisible)
                 .css(unselectable)
             ;
+
+            if (options.scrollable === true) {
+                $el
+                    .css(scrollable);
+            }
 
             if (options.zoom === 'auto') {
                 if (options.width === 'auto' && options.height === 'auto') {
@@ -192,23 +202,26 @@ $('iframe').zoomer({ width: 200, zoom: 0.5 });
             } else {
                 options.zoomerLink.attr('href', options.messageURL || options.src);
             }
-
-            options.zoomerCover
-                .append(options.zoomerLink)
-                .hover(function(){
-                    options.zoomerLink.show();
-                    $(this).css('box-shadow', 'inset 2px 2px ' + (parseInt(options.width, 10) * 2) + 'px rgba(255, 255, 255, 0.2)');
-                }, function(){
-                    options.zoomerLink.hide();
-                    $(this).css('box-shadow', 'none');
-                })
-                .mousedown(function(){
-                    $(this).css('box-shadow', 'inset 2px 2px ' + (parseInt(options.width, 10) * 2) + 'px rgba(200, 200, 200, 0.8)');
-                })
-                .bind('mouseout mouseup', function(){
-                    $(this).css('box-shadow', 'none');
-                })
-            ;
+            if (options.useZoomerCover === true) {
+                options.zoomerCover
+                    .append(options.zoomerLink)
+                    .hover(function(){
+                        options.zoomerLink.show();
+                        $(this).css('box-shadow', 'inset 2px 2px ' + (parseInt(options.width, 10) * 2) + 'px rgba(255, 255, 255, 0.2)');
+                    }, function(){
+                        options.zoomerLink.hide();
+                        $(this).css('box-shadow', 'none');
+                    })
+                    .mousedown(function(){
+                        $(this).css('box-shadow', 'inset 2px 2px ' + (parseInt(options.width, 10) * 2) + 'px rgba(200, 200, 200, 0.8)');
+                    })
+                    .bind('mouseout mouseup', function(){
+                        $(this).css('box-shadow', 'none');
+                    })
+                ;
+                options.zoomerWrapper
+                    .append(options.zoomerCover);
+            }
 
             options.zoomerLoader = $('<div/>')
                 .addClass('zoomer-loader')
@@ -225,7 +238,6 @@ $('iframe').zoomer({ width: 200, zoom: 0.5 });
             ;
 
             options.zoomerWrapper
-                .append(options.zoomerCover)
                 .append(options.zoomerLoader)
             ;
 
@@ -237,7 +249,14 @@ $('iframe').zoomer({ width: 200, zoom: 0.5 });
         updateWrapper: function() {
             var $el = $(this), options = $el.data(pluginName);
 
-            $.each([options.zoomerWrapper.get(0), options.zoomerCover.get(0), options.zoomerLoader.get(0), options.zoomerSmall.get(0)], function(){
+            if (options.useZoomerCover === true) {
+                $(options.zoomerCover.get(0)).css({
+                    height: options.height,
+                    width: options.width
+                });
+            }
+
+            $.each([options.zoomerWrapper.get(0), options.zoomerLoader.get(0), options.zoomerSmall.get(0)], function(){
                 $(this).css({
                     height: options.height,
                     width: options.width
